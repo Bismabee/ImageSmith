@@ -17,7 +17,7 @@ const Footer = ({ isDarkMode }) => (
     </div>
     <div className={`max-w-6xl mx-auto px-6 pt-8 border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'} flex justify-between items-center gap-4 text-sm`}>
       <p>© 2024 ImageSmith.</p>
-      <p className="flex items-center gap-1.5 font-medium opacity-90">Made with <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> by <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">ShitLabs</span></p>
+      <p className="flex items-center gap-1.5 font-medium opacity-90">Made with <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> by <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500">@shakirdmr</span></p>
     </div>
   </footer>
 );

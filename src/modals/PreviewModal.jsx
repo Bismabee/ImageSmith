@@ -11,7 +11,7 @@ const PreviewModal = ({ file, onClose, isDarkMode }) => {
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-gray-500/10">
                     <div>
-                        <h3 className="text-xl font-bold">{file.originalFile.name}</h3>
+                        <h3 className="text-xl font-bold">{(file.originalFile && file.originalFile.name) || file.originalFileName || 'file'}</h3>
                         <div className="flex gap-4 text-xs opacity-60 mt-1">
                             <span>Original: {formatBytes(file.originalSize)}</span>
                             {file.compressedSize > 0 && (
@@ -48,9 +48,18 @@ const PreviewModal = ({ file, onClose, isDarkMode }) => {
                 <div className="p-6 border-t border-gray-500/10 flex justify-end gap-4">
                     <button onClick={onClose} className="px-6 py-2 rounded-xl font-bold border opacity-70 hover:opacity-100">Close</button>
                     {file.compressedUrl && (
-                        <a href={file.compressedUrl} download={`min_${file.originalFile.name}`} className="px-6 py-2 rounded-xl font-bold bg-white text-black shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
-                            <Download className="w-4 h-4" /> Download
-                        </a>
+                        (() => {
+                            const originalName = (file.originalFile && file.originalFile.name) || file.originalFileName || 'file';
+                            const idx = originalName.lastIndexOf('.');
+                            const base = idx > 0 ? originalName.slice(0, idx) : originalName;
+                            const ext = idx > 0 ? originalName.slice(idx) : '';
+                            const processed = `min_${base}_www.ImageSmit.store${ext}`;
+                            return (
+                                <a href={file.compressedUrl} download={processed} className="px-6 py-2 rounded-xl font-bold bg-white text-black shadow-lg hover:scale-105 transition-transform flex items-center gap-2">
+                                    <Download className="w-4 h-4" /> Download
+                                </a>
+                            );
+                        })()
                     )}
                 </div>
             </div>
