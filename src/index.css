@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+
+@import "tailwindcss";
+
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  /* Ensure the background covers the entire viewport */
+  min-height: 100vh;
+  /* Apply Poppins font globally */
+  font-family: 'Poppins', sans-serif;
+}
+
+/* * IMPORTANT: Custom CSS Keyframes for Magic Particles 
+* Tailwind cannot define these complex animations; they must be here.
+*/
+@keyframes magic-float {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  50% { transform: translateY(-20px) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-40px) scale(0); opacity: 0; }
+}
+
+/* Default spin (used by the loading indicator) */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
