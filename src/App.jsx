@@ -14,6 +14,8 @@ import Dashboard from './views/Dashboard.jsx';
 import { compressFile } from './utils/compression.js';
 // IndexedDB removed for this release — original-file persistence disabled
 import CelebrationOverlay from './components/CelebrationOverlay.jsx';
+// GA4 helper (optional) - configure VITE_GA4_ID in your .env
+import ga4 from './utils/ga4.js';
 
 export default function App() {
   // Initialize from localStorage synchronously to avoid setState-in-effect warnings
@@ -68,6 +70,8 @@ export default function App() {
   // --- Restore state from localStorage on mount ---
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 1000);
+    // initialize analytics (if configured)
+    try { ga4.initGA4(); } catch { /* ignore */ }
     return () => clearTimeout(timer);
   }, []);
 
@@ -398,6 +402,8 @@ export default function App() {
           activateGodMode={activateGodMode}
         />
       )}
+      {/* Track SPA view changes: call pageview when `view` changes */}
+      {useEffect(() => { try { ga4.pageview(view); } catch {} }, [view])}
       
       <SplashScreen show={showSplash} />
       <PreviewModal file={previewFile} onClose={() => setPreviewFile(null)} isDarkMode={isDarkMode} />
