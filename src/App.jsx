@@ -15,15 +15,39 @@ import { compressFile } from './utils/compression.js';
 import CelebrationOverlay from './components/CelebrationOverlay.jsx';
 
 export default function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [view, setView] = useState('landing');
-  const [user, setUser] = useState(null); 
-  const [isGodMode, setIsGodMode] = useState(false); 
+  // Initialize from localStorage synchronously to avoid setState-in-effect warnings
+  const _initialStored = (() => {
+    try {
+      const raw = typeof window !== 'undefined' ? localStorage.getItem('imagesmith_state') : null;
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) {
+      console.warn('Failed to parse stored state', err);
+      return {};
+    }
+  })();
+
+  const [isDarkMode, setIsDarkMode] = useState(() => _initialStored.isDarkMode ?? false);
+  const [view, setView] = useState(() => _initialStored.view ?? 'landing');
+  const [user, setUser] = useState(() => _initialStored.user ?? null);
+  const [isGodMode, setIsGodMode] = useState(() => _initialStored.isGodMode ?? false);
   const [showSplash, setShowSplash] = useState(true);
   
   // File State
-  const [files, setFiles] = useState([]); 
-  const [selectedIds, setSelectedIds] = useState([]); 
+  const [files, setFiles] = useState(() => {
+    const sfiles = _initialStored.files || [];
+    return sfiles.map(f => ({
+      id: f.id,
+      originalFile: null,
+      originalFileName: f.originalFileName || f.name || 'file',
+      previewUrl: f.previewDataUrl || f.previewUrl || null,
+      previewDataUrl: f.previewDataUrl || f.previewUrl || null,
+      compressedUrl: f.compressedUrl || null,
+      compressedSize: f.compressedSize || 0,
+      originalSize: f.originalSize || 0,
+      status: f.status || (f.compressedUrl ? 'done' : 'ready')
+    }));
+  });
+  const [selectedIds, setSelectedIds] = useState(() => _initialStored.selectedIds || []);
   const [previewFile, setPreviewFile] = useState(null); 
   const [isGlobalProcessing, setIsGlobalProcessing] = useState(false);
   
@@ -38,53 +62,12 @@ export default function App() {
   const [mode, setMode] = useState('percentage');
 
   const fileInputRef = useRef(null);
-  const [hydrated, setHydrated] = useState(false);
+  const [hydrated] = useState(true);
 
   // --- Restore state from localStorage on mount ---
   useEffect(() => {
-      try {
-        const raw = localStorage.getItem('imagesmith_state');
-        if (raw) {
-          const s = JSON.parse(raw);
-          if (s.isDarkMode !== undefined) setIsDarkMode(s.isDarkMode);
-          if (s.view) setView(s.view);
-          if (s.user) setUser(s.user);
-          if (s.isGodMode) setIsGodMode(s.isGodMode);
-          if (s.quality) setQuality(s.quality);
-          if (s.targetSizeKB) setTargetSizeKB(s.targetSizeKB);
-          if (s.mode) setMode(s.mode);
-          if (s.selectedIds) setSelectedIds(s.selectedIds || []);
-          if (s.files) {
-            // Rehydrate files - keep data URLs for previews/compressed results
-            const reFiles = s.files.map(f => ({
-              id: f.id,
-              originalFile: null, // cannot restore File objects reliably
-              originalFileName: f.originalFileName || f.name || 'file',
-              previewUrl: f.previewDataUrl || f.previewUrl || null,
-              previewDataUrl: f.previewDataUrl || f.previewUrl || null,
-              compressedUrl: f.compressedUrl || null,
-              compressedSize: f.compressedSize || 0,
-              originalSize: f.originalSize || 0,
-              status: f.status || (f.compressedUrl ? 'done' : 'ready')
-            }));
-            setFiles(reFiles);
-
-            // No IDB restore: original File objects are not persisted across reloads
-          }
-        } else {
-          // fallback: try to restore just the view from a lightweight key
-          const v = localStorage.getItem('imagesmith_view');
-          if (v) setView(v);
-        }
-      } catch (e) {
-        console.warn('Failed to restore state', e);
-      }
-
-      // mark hydration complete so we don't immediately overwrite restored state
-      setHydrated(true);
-
-      const timer = setTimeout(() => setShowSplash(false), 1000);
-      return () => clearTimeout(timer);
+    const timer = setTimeout(() => setShowSplash(false), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   // --- Handlers ---
@@ -127,13 +110,10 @@ export default function App() {
   // Persist view separately (lightweight) to ensure we can restore view even if larger state fails
   useEffect(() => {
     if (!hydrated) return;
-    try { localStorage.setItem('imagesmith_view', view); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('imagesmith_view', view); } catch { /* ignore */ }
   }, [view, hydrated]);
 
-  const handleLogin = () => {
-    // login flow disabled for this release — placeholder
-    setUser({ name: "C", email: "creator@imagesmith.store", photo: null });
-  };
+  // login flow disabled for this release — placeholder (removed to avoid unused warnings)
 
   const handleLogout = () => {
       setUser(null);
@@ -181,7 +161,7 @@ export default function App() {
     if (!id) return;
     // No IDB: just clear the in-memory originalFile reference for this session
     setFiles(prev => prev.map(f => f.id === id ? { ...f, originalFile: null } : f));
-    try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'info', message: 'Original cleared for this session.' } })); } catch(e){}
+    try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'info', message: 'Original cleared for this session.' } })); } catch { /* ignore */ }
   };
 
   const handleFiles = async (fileList) => {
@@ -192,7 +172,7 @@ export default function App() {
     const filesArr = Array.from(fileList);
     const newFiles = await Promise.all(filesArr.map(async (file) => {
         let previewDataUrl = null;
-        try { previewDataUrl = await readFileAsDataUrl(file); } catch (e) { previewDataUrl = URL.createObjectURL(file); }
+          try { previewDataUrl = await readFileAsDataUrl(file); } catch { previewDataUrl = URL.createObjectURL(file); }
         return {
           id: Math.random().toString(36).substr(2, 9),
           originalFile: file,
@@ -223,32 +203,7 @@ export default function App() {
     }, 2000);
   };
 
-  const processSingleFile = (file) => {
-      const create = async () => {
-        let previewDataUrl = null;
-        try { previewDataUrl = await readFileAsDataUrl(file); } catch (e) { previewDataUrl = URL.createObjectURL(file); }
-        const newFile = {
-          id: Math.random().toString(36).substr(2, 9),
-          originalFile: file,
-          originalFileName: file.name,
-          previewUrl: previewDataUrl,
-          previewDataUrl,
-          compressedUrl: null,
-          compressedSize: 0,
-          originalSize: file.size,
-          status: 'uploading'
-        };
-        setFiles([newFile]);
-        setSelectedIds([newFile.id]);
-        const sizeKB = file.size / 1024;
-        setTargetSizeKB(Math.round(sizeKB * 0.6));
-        setTimeout(() => {
-            setFiles([{...newFile, status: 'ready'}]);
-            setView('app');
-        }, 2000);
-      };
-      create();
-  };
+  
 
   // --- REAL COMPRESSION ENGINE ---
     const performCompression = async (ids) => {
@@ -292,7 +247,7 @@ export default function App() {
                 raw = new TextEncoder().encode(decodeURIComponent(parts[1] || ''));
               }
               inputBlob = new Blob([raw], { type: mime });
-            } catch (e) {
+            } catch {
               inputBlob = null;
             }
           }
@@ -300,7 +255,7 @@ export default function App() {
 
         if (!inputBlob || !inputBlob.type || !inputBlob.type.startsWith('image/')) {
           const msg = `Cannot compress ${file.originalFileName || file.id}: original file not available or invalid. Re-upload to re-compress.`;
-          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch(e){}
+          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch { /* ignore */ }
           return { ...file, status: 'error' };
         }
 
@@ -325,7 +280,7 @@ export default function App() {
         } catch (error) {
           console.error("Compression Failed", error);
           const msg = error && error.message ? `Compression Failed: ${error.message}` : 'Compression Failed';
-          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch(e){}
+          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch { /* ignore */ }
           return { ...file, status: 'error' };
         }
       });
@@ -423,10 +378,8 @@ export default function App() {
             compressSingleImage={compressSingleImage}
           replaceOriginal={replaceOriginal}
           removeOriginal={removeOriginal}
-          toggleTheme={toggleTheme}
           isGodMode={isGodMode}
           activateGodMode={activateGodMode}
-          setView={setView}
         />
       )}
       

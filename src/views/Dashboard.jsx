@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Upload, Layers, ImageIcon, X, CheckCircle2, Download, Sparkles, CheckSquare, Eye, MoreVertical } from 'lucide-react';
 import GlowingStarsLoader from '../components/GlowingStarsLoader.jsx';
 import { formatBytes } from '../utils/formatting.js';
@@ -25,12 +25,11 @@ const Dashboard = ({
     compressSingleImage,
     replaceOriginal,
     removeOriginal,
-    toggleTheme,
-    isGodMode,
-    activateGodMode,
-    setView
+    isGodMode
 }) => {
     const replaceInputRef = useRef(null);
+    const zipBaseRef = useRef(null);
+    useEffect(() => { zipBaseRef.current = Date.now(); }, []);
     const [pendingReplaceId, setPendingReplaceId] = useState(null);
     const [menuOpenId, setMenuOpenId] = useState(null);
   
@@ -111,7 +110,7 @@ const Dashboard = ({
                 const url = URL.createObjectURL(content);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `imagesmith_batch_${Date.now()}.zip`;
+                a.download = `imagesmith_batch_${zipBaseRef.current}.zip`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
