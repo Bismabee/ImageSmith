@@ -118,6 +118,11 @@ export default function App() {
     try { localStorage.setItem('imagesmith_view', view); } catch { /* ignore */ }
   }, [view, hydrated]);
 
+  // Track SPA view changes with GA4 (if configured)
+  useEffect(() => {
+    try { ga4.pageview(view); } catch (e) { /* ignore */ }
+  }, [view]);
+
   // login flow disabled for this release — placeholder (removed to avoid unused warnings)
 
   const handleLogout = () => {
@@ -302,6 +307,7 @@ export default function App() {
       try {
         const anyDone = Array.isArray(results) && results.some(r => r && r.status === 'done');
         if (anyDone) {
+          try { ga4.trackEvent('compression_complete', { files_processed: results.filter(r => r && r.status === 'done').length }); } catch {}
           window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: {
             type: 'info',
             message: 'Compression finished — files are ready. If you liked ImageSmith, consider saying thanks!',
@@ -352,8 +358,8 @@ export default function App() {
   return (
     <div className={`min-h-screen font-sans overflow-x-hidden selection:bg-pink-500/30 transition-colors duration-500 
       ${isDarkMode 
-        ? 'bg-[#0f0c29] bg-gradient-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white' 
-        : 'bg-blue-50 bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800'}
+        ? 'bg-[#0f0c29] bg-linear-to-br from-[#0f0c29] via-[#302b63] to-[#24243e] text-white' 
+        : 'bg-blue-50 bg-linear-to-br from-blue-50 via-white to-purple-50 text-gray-800'}
     `}>
       
       {isGodMode && <MagicParticles />}
@@ -402,8 +408,7 @@ export default function App() {
           activateGodMode={activateGodMode}
         />
       )}
-      {/* Track SPA view changes: call pageview when `view` changes */}
-      {useEffect(() => { try { ga4.pageview(view); } catch {} }, [view])}
+      
       
       <SplashScreen show={showSplash} />
       <PreviewModal file={previewFile} onClose={() => setPreviewFile(null)} isDarkMode={isDarkMode} />
