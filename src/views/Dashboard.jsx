@@ -313,8 +313,22 @@ const Dashboard = ({
                     {/* Compact mode toggles always visible (Size / Percentage) */}
                     <div className="flex items-center justify-center mb-2">
                         <div className={`flex px-1 rounded-full w-full max-w-2xl mx-auto ${isDarkMode ? 'bg-black/50' : 'bg-white/70'}`}>
-                            <button onClick={() => setMode('size')} className={`flex-1 py-1 text-sm font-semibold rounded-full transition-all ${mode === 'size' ? (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900') : 'text-gray-400'}`}>Size</button>
-                            <button onClick={() => setMode('percentage')} className={`flex-1 py-1 text-sm font-semibold rounded-full transition-all ${mode === 'percentage' ? (isDarkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900') : 'text-gray-400'}`}>Percentage</button>
+                            <button
+                                onClick={() => setMode('size')}
+                                className={`flex-1 py-1 text-sm font-semibold rounded-full transition-all border ${mode === 'size'
+                                    ? (isDarkMode ? 'bg-gray-700 text-white border-white/20' : 'bg-white text-gray-900 border-gray-200')
+                                    : (isDarkMode ? 'text-gray-400 border-white/10' : 'text-gray-400 border-gray-200/50')}`}
+                            >
+                                Size
+                            </button>
+                            <button
+                                onClick={() => setMode('percentage')}
+                                className={`flex-1 py-1 text-sm font-semibold rounded-full transition-all border ${mode === 'percentage'
+                                    ? (isDarkMode ? 'bg-gray-700 text-white border-white/20' : 'bg-white text-gray-900 border-gray-200')
+                                    : (isDarkMode ? 'text-gray-400 border-white/10' : 'text-gray-400 border-gray-200/50')}`}
+                            >
+                                Percentage
+                            </button>
                         </div>
                     </div>
 

@@ -62,7 +62,7 @@ export default function App() {
   // Compression Settings
   const [quality, setQuality] = useState(75);
   const [targetSizeKB, setTargetSizeKB] = useState(500);
-  const [mode, setMode] = useState('percentage');
+  const [mode, setMode] = useState(() => _initialStored.mode ?? 'size');
 
   const fileInputRef = useRef(null);
   const [hydrated] = useState(true);
