@@ -353,7 +353,8 @@ export default function App() {
         <LandingPage 
           setView={setView} 
           activateGodMode={activateGodMode}
-          isDarkMode={isDarkMode} 
+          isDarkMode={isDarkMode}
+          demoUrl={import.meta.env.VITE_DEMO_URL || 'https://youtu.be/0f6auHLFHxI'}
         />
       ) : (
         <Dashboard 

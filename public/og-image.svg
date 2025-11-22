@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1">
+      <stop offset="0" stop-color="#ec4899"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#0f172a" />
+  <rect x="40" y="40" width="1120" height="550" rx="28" fill="url(#g)" opacity="0.12" />
+  <g fill="#fff" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+    <text x="80" y="190" font-size="64" font-weight="700">ImageSmith</text>
+    <text x="80" y="260" font-size="28" fill="#e6edf3">Free · No Ads · Unlimited Bulk Compression</text>
+    <text x="80" y="305" font-size="20" fill="#cbd5e1">Fast, privacy-first, in your browser</text>
+  </g>
+</svg>
