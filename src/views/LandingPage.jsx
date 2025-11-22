@@ -1,6 +1,6 @@
 import React from 'react';
 import { Zap, ArrowRight, Play, CheckCircle2, Crown, ImageIcon } from 'lucide-react';
-import FAQItem from '../components/FAQItem';
+import FAQItem from '../components/FAQitem.jsx';
 
 const LandingPage = ({ setView, activateGodMode, isDarkMode }) => {
   return (

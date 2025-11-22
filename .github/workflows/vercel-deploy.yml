@@ -23,6 +23,10 @@ jobs:
         run: npm run build
 
       - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx vercel --prod --confirm --token $VERCEL_TOKEN
+        uses: vercel/action@v1
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod --confirm'
+          # Optional: set these secrets if you want to pin to a specific Vercel project
+          # vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          # vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}

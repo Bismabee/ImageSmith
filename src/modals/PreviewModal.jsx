@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Download, Sparkles } from 'lucide-react';
-import { formatBytes } from '../utils/formatting';
+import { formatBytes } from '../utils/formatting.js';
 
 const PreviewModal = ({ file, onClose, isDarkMode }) => {
     if (!file) return null;

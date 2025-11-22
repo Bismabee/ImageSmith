@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import MagicParticles from './components/MagicParticles';
-import SplashScreen from './components/SplashScreen';
-import Toaster from './components/Toaster';
+import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
+import MagicParticles from './components/MagicParticles.jsx';
+import SplashScreen from './components/SplashScreen.jsx';
+import Toaster from './components/Toaster.jsx';
 // Login modal kept in repo but hidden for release (no visible triggers)
-import PaymentModal from './modals/PaymentModal';
-import PreviewModal from './modals/PreviewModal';
-import LandingPage from './views/LandingPage';
-import Dashboard from './views/Dashboard';
+import PaymentModal from './modals/PaymentModal.jsx';
+import PreviewModal from './modals/PreviewModal.jsx';
+import LandingPage from './views/LandingPage.jsx';
+import Dashboard from './views/Dashboard.jsx';
 // IMPORT THE REAL COMPRESSION UTILITY
 import { compressFile } from './utils/compression.js';
 // IndexedDB removed for this release — original-file persistence disabled
-import CelebrationOverlay from './components/CelebrationOverlay';
+import CelebrationOverlay from './components/CelebrationOverlay.jsx';
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);

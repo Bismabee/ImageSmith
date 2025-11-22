@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Upload, Layers, ImageIcon, X, CheckCircle2, Download, Sparkles, CheckSquare, Eye, MoreVertical } from 'lucide-react';
-import GlowingStarsLoader from '../components/GlowingStarsLoader';
-import { formatBytes } from '../utils/formatting';
+import GlowingStarsLoader from '../components/GlowingStarsLoader.jsx';
+import { formatBytes } from '../utils/formatting.js';
 
 const Dashboard = ({ 
     files, 
