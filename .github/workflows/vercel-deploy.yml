@@ -22,11 +22,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy to Vercel
-        uses: vercel/action@v1
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod --confirm'
-          # Optional: set these secrets if you want to pin to a specific Vercel project
-          # vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          # vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+      - name: Deploy to Vercel (CLI)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Use the Vercel CLI to deploy the already-built `dist` folder.
+          # The token is provided via the VERCEL_TOKEN env var.
+          npx --yes vercel --prod --confirm --token "$VERCEL_TOKEN"
+          # If you prefer to pin to an org/project, uncomment and set these:
+          # npx --yes vercel --prod --confirm --token "$VERCEL_TOKEN" --org "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
