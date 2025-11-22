@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react'
 import React, { useState, useRef, useEffect } from 'react';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -393,6 +394,7 @@ export default function App() {
       <CelebrationOverlay isOpen={showCelebration} onClose={() => setShowCelebration(false)} isDarkMode={isDarkMode} />
 
       <Footer isDarkMode={isDarkMode} />
+      <Analytics />
     </div>
   );
 }
