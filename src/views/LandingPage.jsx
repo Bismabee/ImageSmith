@@ -74,9 +74,11 @@ const LandingPage = ({ setView, activateGodMode, isDarkMode, demoUrl = null }) =
                 <img src='/hero.png' className="w-full h-auto object-cover rounded-xl shadow-lg col-span-2" alt="Hero Demo" />
               </div>
               {/* Mobile CTAs: show immediately under hero on small screens */}
-              <div className="flex md:hidden flex-col items-center gap-3 mt-4">
-                <button onClick={() => setView('app')} className="w-full px-6 py-3 rounded-full font-bold text-base bg-pink-500 text-white">Start Now</button>
-                <a href={demoUrl || '/'} target="_blank" rel="noopener noreferrer" className={`w-full px-6 py-3 rounded-full font-bold text-base text-center border ${isDarkMode ? 'border-white/20 text-white' : 'border-black/10 text-gray-800'}`}>Watch Demo</a>
+              <div className="flex md:hidden flex-col items-center gap-3 mt-4 w-full px-4">
+                <button onClick={() => setView('app')} className="w-full px-8 py-4 rounded-full font-bold text-lg shadow-lg hover:scale-105 transition-all flex items-center justify-center gap-2 glow-cta">Start Now <ArrowRight className="w-5 h-5" /></button>
+                <a href={demoUrl || '/'} target="_blank" rel="noopener noreferrer" className={`w-full px-8 py-4 rounded-full font-bold text-lg border transition-all inline-flex items-center justify-center gap-2 ${isDarkMode ? 'border-white/20 hover:bg-white/10 text-white' : 'border-black/10 hover:bg-black/5 text-gray-800'}`}>
+                  <Play className="w-4 h-4 fill-current" /> Watch Demo
+                </a>
               </div>
           </div>
         </div>
