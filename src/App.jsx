@@ -294,6 +294,20 @@ export default function App() {
           return processed || f;
       }));
 
+      // If we processed any files successfully, show a persistent 'Say Thanks' toast
+      try {
+        const anyDone = Array.isArray(results) && results.some(r => r && r.status === 'done');
+        if (anyDone) {
+          window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: {
+            type: 'info',
+            message: 'Compression finished — files are ready. If you liked ImageSmith, consider saying thanks!',
+            persistent: true,
+            actionLabel: 'Say Thanks',
+            actionUrl: 'https://x.com/shakirdmr'
+          }}));
+        }
+      } catch (e) { /* ignore */ }
+
       setIsGlobalProcessing(false);
   };
 
