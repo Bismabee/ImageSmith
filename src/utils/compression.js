@@ -31,12 +31,18 @@ export async function compressFile(file, settings = {}) {
     imgBitmap = await createImageBitmap(blob);
   } catch {
     // Fallback to Image if createImageBitmap not available
-    imgBitmap = await new Promise((res, rej) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = rej;
-      img.src = URL.createObjectURL(file);
-    });
+    try {
+      imgBitmap = await new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = (e) => rej(new Error('Image fallback failed to load'));
+        img.src = URL.createObjectURL(file);
+      });
+    } catch (err) {
+      // Provide a richer error so the caller can show useful diagnostics
+      const meta = `name=${file.name || 'unknown'} type=${file.type || 'unknown'} size=${file.size || 0}`;
+      throw new Error(`Image decode failed (${meta}): ${err && err.message ? err.message : 'unknown error'}`);
+    }
   }
 
   // Resize to maxDimension to avoid huge canvas
@@ -66,7 +72,11 @@ export async function compressFile(file, settings = {}) {
   const canvasToBlob = (type, q) =>
     new Promise((res) => {
       // canvas.toBlob may not accept quality for some types — wrapped for safety
-      canvas.toBlob((b) => res(b), type, typeof q === 'number' ? q : undefined);
+      try {
+        canvas.toBlob((b) => res(b), type, typeof q === 'number' ? q : undefined);
+      } catch (e) {
+        res(null);
+      }
     });
 
   const blobToDataUrl = (b) =>
@@ -81,6 +91,7 @@ export async function compressFile(file, settings = {}) {
   if (mode === 'percentage') {
     const q = clamp(quality / 100, 0.01, 1);
     const outBlob = await canvasToBlob(outputType, q);
+    if (!outBlob) throw new Error(`Failed to create output blob (type=${outputType})`);
     const dataUrl = await blobToDataUrl(outBlob);
     return {
       blob: outBlob,
@@ -121,6 +132,10 @@ export async function compressFile(file, settings = {}) {
     while (attempts < maxAttempts && min <= max) {
       const q = (min + max) / 2;
       const out = await canvasToBlob(outputType, q);
+      if (!out) {
+        // if we failed to produce a blob at this quality, bail with helpful message
+        throw new Error(`Canvas toBlob returned null during binary search (type=${outputType}, q=${q})`);
+      }
       const size = out.size;
 
       if (size <= targetBytes) {
@@ -140,6 +155,7 @@ export async function compressFile(file, settings = {}) {
     // Ensure we have a best blob
     if (!best.blob) {
       const lowBlob = await canvasToBlob(outputType, 0.01);
+      if (!lowBlob) throw new Error(`Failed to produce low-quality blob (type=${outputType})`);
       best = { blob: lowBlob, size: lowBlob.size, quality: 0.01 };
     }
 

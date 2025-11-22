@@ -72,6 +72,26 @@ export default function App() {
     const timer = setTimeout(() => setShowSplash(false), 1000);
     // initialize analytics (if configured)
     try { ga4.initGA4(); } catch { /* ignore */ }
+    // Global error capture so we can show helpful details in the UI when something unexpected happens
+    const onError = (evt) => {
+      try {
+        const msg = evt && (evt.message || evt.reason || String(evt)) || 'Unknown error';
+        const stack = (evt && evt.error && evt.error.stack) || (evt && evt.reason && evt.reason.stack) || null;
+        const details = stack ? `${msg}\n\n${String(stack).slice(0, 2000)}` : String(msg).slice(0, 2000);
+        console.error('Unhandled error captured', evt);
+        try { ga4.trackEvent && ga4.trackEvent('uncaught_error', { message: msg.slice(0, 200) }); } catch {}
+        window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: {
+          type: 'error',
+          message: 'An unexpected error occurred. Click Details for more info.',
+          duration: 15000,
+          actionLabel: 'Details',
+          actionDetails: { title: 'Unhandled error', details }
+        }}));
+      } catch (e) { console.error('error reporting failed', e); }
+    };
+    const onRejection = (evt) => onError(evt);
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onRejection);
     return () => clearTimeout(timer);
   }, []);
 
@@ -111,6 +131,39 @@ export default function App() {
     if (!hydrated) return;
     saveAppState();
   }, [saveAppState, hydrated]);
+
+  // Clear persisted state and reset in-memory selections when the user leaves the site
+  useEffect(() => {
+    const clearPersisted = () => {
+      try {
+        localStorage.removeItem('imagesmith_state');
+        localStorage.removeItem('imagesmith_view');
+      } catch (e) { /* ignore */ }
+    };
+    const clearEverything = () => {
+      try { clearPersisted(); } catch {};
+      try {
+        setFiles([]);
+        setSelectedIds([]);
+        setPreviewFile(null);
+        setQuality(75);
+        setTargetSizeKB(500);
+        setMode('size');
+        setUser(null);
+        setIsGodMode(false);
+        setView('landing');
+      } catch (e) { /* ignore */ }
+    };
+
+    // Only clear on full unload/navigation away (pagehide/beforeunload).
+    window.addEventListener('pagehide', clearEverything);
+    window.addEventListener('beforeunload', clearEverything);
+
+    return () => {
+      window.removeEventListener('pagehide', clearEverything);
+      window.removeEventListener('beforeunload', clearEverything);
+    };
+  }, []);
 
   // Persist view separately (lightweight) to ensure we can restore view even if larger state fails
   useEffect(() => {
@@ -230,8 +283,11 @@ export default function App() {
 
       const filesToProcess = files.filter(f => idsToProcess.includes(f.id));
 
-      // Map files to promises using our utility
-      const promises = filesToProcess.map(async (file) => {
+      // Process files sequentially to avoid memory spikes and intermittent decode failures
+      const results = [];
+      for (const file of filesToProcess) {
+        // mark this file as compressing so UI shows spinner per-item
+        setFiles(prev => prev.map(f => f.id === file.id ? { ...f, status: 'compressing' } : f));
         // Determine a usable Blob/File for compression. If the original File object
         // is missing (e.g. after reload), but we have a previewDataUrl (data URL),
         // convert that to a Blob so we can still compress.
@@ -265,7 +321,15 @@ export default function App() {
 
         if (!inputBlob || !inputBlob.type || !inputBlob.type.startsWith('image/')) {
           const msg = `Cannot compress ${file.originalFileName || file.id}: original file not available or invalid. Re-upload to re-compress.`;
-          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch { /* ignore */ }
+          try {
+            window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: {
+              type: 'error',
+              message: msg,
+              duration: 7000,
+              actionLabel: 'Details',
+              actionDetails: { title: 'Missing original file', details: `File id: ${file.id}\nName: ${file.originalFileName || 'N/A'}` }
+            }}));
+          } catch { /* ignore */ }
           return { ...file, status: 'error' };
         }
 
@@ -276,26 +340,50 @@ export default function App() {
             targetSizeKB
           });
 
-            // No IDB persistence: derived blobs are kept in-memory only for this session
-
-          return { 
+          // No IDB persistence: derived blobs are kept in-memory only for this session
+          const processed = { 
             ...file, 
-            // keep originalFile if present, otherwise attach the derived blob so
-            // subsequent operations in the same session can reuse it
             originalFile: file.originalFile || inputBlob,
             compressedUrl: result.dataUrl, 
             compressedSize: result.compressedSize, 
             status: 'done' 
           };
+          // update this file in UI immediately
+          setFiles(prev => prev.map(f => f.id === file.id ? processed : f));
+          results.push(processed);
         } catch (error) {
           console.error("Compression Failed", error);
-          const msg = error && error.message ? `Compression Failed: ${error.message}` : 'Compression Failed';
-          try { window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: { type: 'error', message: msg } })); } catch { /* ignore */ }
-          return { ...file, status: 'error' };
-        }
-      });
+          // Create a user-friendly short message and include a Details action with the raw error
+          const raw = (error && (error.message || String(error))) || 'Unknown error';
+          let shortMsg = 'Compression failed.';
+          if (raw.toLowerCase().includes('invalid image')) {
+            shortMsg = 'Invalid or unsupported image. Re-upload or try a different file.';
+          } else if (raw.toLowerCase().includes('unknown compression mode')) {
+            shortMsg = 'Internal error: unknown compression mode. Please report this.';
+          } else if (raw.toLowerCase().includes('createimagebitmap') || raw.toLowerCase().includes('image.decode')) {
+            shortMsg = 'Image decoding failed — file may be corrupted or unsupported.';
+          } else if (raw.length < 120) {
+            shortMsg = `Compression failed: ${raw}`;
+          }
 
-      const results = await Promise.all(promises);
+          try {
+            window.dispatchEvent(new CustomEvent('imagesmith:toast', {
+              detail: {
+                type: 'error',
+                message: shortMsg,
+                duration: 8000,
+                actionLabel: 'Details',
+                actionDetails: { title: 'Compression error', details: raw }
+              }
+            }));
+          } catch {
+            /* ignore */
+          }
+          const processed = { ...file, status: 'error' };
+          setFiles(prev => prev.map(f => f.id === file.id ? processed : f));
+          results.push(processed);
+        }
+      }
       
       // Merge results back
       setFiles(prev => prev.map(f => {
@@ -308,10 +396,12 @@ export default function App() {
         const anyDone = Array.isArray(results) && results.some(r => r && r.status === 'done');
         if (anyDone) {
           try { ga4.trackEvent('compression_complete', { files_processed: results.filter(r => r && r.status === 'done').length }); } catch {}
+          const count = results.filter(r => r && r.status === 'done').length;
           window.dispatchEvent(new CustomEvent('imagesmith:toast', { detail: {
             type: 'info',
-            message: 'Compression finished — files are ready. If you liked ImageSmith, consider saying thanks!',
+            message: `✨ Compression finished — ${count} file${count > 1 ? 's' : ''} ready. Thanks for using ImageSmith!`,
             persistent: true,
+            duration: 12000,
             actionLabel: 'Say Thanks',
             actionUrl: 'https://x.com/shakirdmr'
           }}));
