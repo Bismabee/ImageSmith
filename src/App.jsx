@@ -35,6 +35,15 @@ export default function App() {
   const [isGodMode, setIsGodMode] = useState(() => _initialStored.isGodMode ?? false);
   const [showSplash, setShowSplash] = useState(true);
   
+  // Update document title based on view for better SEO
+  useEffect(() => {
+    const titles = {
+      landing: 'Free Image Compressor Online | Bulk Compression Tool - No Ads | ImageSmith',
+      app: 'Compress Images - Free Bulk Image Compressor | ImageSmith'
+    };
+    document.title = titles[view] || titles.landing;
+  }, [view]);
+  
   // File State
   const [files, setFiles] = useState(() => {
     const sfiles = _initialStored.files || [];

@@ -7,7 +7,7 @@ const PaymentModal = ({ isOpen, onClose, handlePurchase, isDarkMode }) => {
     return (
        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
           <div className={`w-full max-w-md p-8 rounded-3xl shadow-2xl relative overflow-hidden ${isDarkMode ? 'bg-[#1a1a2e] border border-white/10' : 'bg-white'}`}>
-             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-400 to-amber-600"></div>
+             <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-yellow-400 to-amber-600"></div>
              <button onClick={onClose} className="absolute top-4 right-4 opacity-50 hover:opacity-100"><X className="w-6 h-6" /></button>
              <div className="text-center mb-6 mt-2">
                 <div className="inline-block p-3 rounded-full bg-yellow-500/10 text-yellow-500 mb-4"><Crown className="w-8 h-8 fill-current" /></div>

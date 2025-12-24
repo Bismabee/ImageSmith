@@ -138,10 +138,10 @@ const Dashboard = ({
       {/* 1. UPLOAD AREA */}
       {files.length === 0 && (
           <div className="flex flex-col items-center justify-center min-h-[50vh] w-full">
-              <div className="text-center mb-12"><h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">Batch Compress.<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-violet-600">Save Hours.</span></h1></div>
-              <div onClick={() => fileInputRef.current.click()} className={`group relative w-full max-w-xl h-64 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${isDarkMode ? 'border-white/20 bg-white/5 hover:bg-white/10' : 'border-gray-300 bg-white/60 hover:bg-white/80 shadow-sm hover:shadow-md'} hover:scale-[1.02]`}>
-                  <input type="file" multiple ref={fileInputRef} onChange={(e) => handleFiles(e.target.files)} accept="image/*" className="hidden" />
-                  <div className="bg-gradient-to-tr from-pink-500 to-violet-600 p-4 rounded-full shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300"><Upload className="w-8 h-8 text-white" /></div>
+              <div className="text-center mb-12"><h1 className="text-4xl md:text-6xl font-extrabold mb-4 tracking-tight">Batch Compress.<br /><span className="text-transparent bg-clip-text bg-linear-to-r from-pink-500 to-violet-600">Save Hours.</span></h1></div>
+              <div onClick={() => fileInputRef.current.click()} className={`group relative w-full max-w-xl h-64 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${isDarkMode ? 'border-white/20 bg-white/5 hover:bg-white/10' : 'border-gray-300 bg-white/60 hover:bg-white/80 shadow-sm hover:shadow-md'} hover:scale-[1.02]`} role="button" tabIndex={0} aria-label="Upload images for compression" onKeyPress={(e) => e.key === 'Enter' && fileInputRef.current.click()}>
+                  <input type="file" multiple ref={fileInputRef} onChange={(e) => handleFiles(e.target.files)} accept="image/*" className="hidden" aria-label="Select images to compress" />
+                  <div className="bg-linear-to-tr from-pink-500 to-violet-600 p-4 rounded-full shadow-xl mb-4 group-hover:scale-110 transition-transform duration-300"><Upload className="w-8 h-8 text-white" aria-hidden="true" /></div>
                   <p className={`text-lg font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Drop images here</p>
                   <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Single (Free) or Batch (God Mode)</p>
               </div>
@@ -162,8 +162,8 @@ const Dashboard = ({
                  {files.length === 1 && <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{files[0].status !== 'uploading' ? `Original: ${formatBytes(files[0].originalSize)}` : ''}</p>}
              </div>
              <div className="flex items-center gap-2">
-                 {files.length > 1 && (<button onClick={toggleSelectAll} className={`text-xs font-bold px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-100 hover:bg-gray-200'}`}>{selectedIds.length === files.length ? 'Deselect All' : 'Select All'}</button>)}
-                 <button onClick={reset} className={`p-2 rounded-full ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`}><X className="w-5 h-5" /></button>
+                 {files.length > 1 && (<button onClick={toggleSelectAll} className={`text-xs font-bold px-3 py-2 rounded-lg transition-colors ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-100 hover:bg-gray-200'}`} aria-label={selectedIds.length === files.length ? 'Deselect all images' : 'Select all images'}>{selectedIds.length === files.length ? 'Deselect All' : 'Select All'}</button>)}
+                 <button onClick={reset} className={`p-2 rounded-full ${isDarkMode ? 'bg-white/10 hover:bg-white/20' : 'bg-gray-200 hover:bg-gray-300'}`} aria-label="Clear all images and reset"><X className="w-5 h-5" aria-hidden="true" /></button>
              </div>
           </div>
 
@@ -175,21 +175,21 @@ const Dashboard = ({
                               <>
                                  <div className="flex flex-col md:flex-row md:h-[500px] h-auto">
                                      <div className="flex-1 relative border-b md:border-b-0 md:border-r border-gray-500/20 min-h-[180px] md:min-h-0">
-                                          <div className="absolute top-4 left-4 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow">ORIGINAL</div>
-                                          <img src={files[0].previewUrl} className="w-full h-[40vh] md:h-full object-contain p-4" alt="Original" />
+                                          <div className="absolute top-4 left-4 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow" role="status">ORIGINAL</div>
+                                          <img src={files[0].previewUrl} className="w-full h-[40vh] md:h-full object-contain p-4" alt={`Original ${getFileName(files[0])}`} loading="lazy" />
                                           <div className="absolute bottom-4 left-4 z-10 flex flex-col bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white"><span className="text-[10px] opacity-70 uppercase tracking-wider">Size</span><span className="text-sm font-bold font-mono">{formatBytes(files[0].originalSize)}</span></div>
                                      </div>
                                      <div className="flex-1 relative">
-                                          <div className="absolute top-4 right-4 z-10 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow">COMPRESSED</div>
-                                          <img src={files[0].compressedUrl} className="w-full h-[40vh] md:h-full object-contain p-4" alt="Compressed" />
+                                          <div className="absolute top-4 right-4 z-10 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded shadow" role="status">COMPRESSED</div>
+                                          <img src={files[0].compressedUrl} className="w-full h-[40vh] md:h-full object-contain p-4" alt={`Compressed ${getFileName(files[0])}`} loading="lazy" />
                                           <div className="absolute bottom-4 right-4 z-10 flex flex-col bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white text-right"><span className="text-[10px] opacity-70 uppercase tracking-wider">New Size</span><span className="text-sm font-bold font-mono">{formatBytes(files[0].compressedSize)}</span></div>
                                      </div>
                                  </div>
 
                                  <div className="flex items-center justify-center md:justify-end gap-3 p-4">
-                                    <button onClick={() => compressSingleImage()} className="py-2 px-4 rounded-lg bg-pink-500 text-white font-bold shadow hover:scale-105 transition-transform">Re-compress</button>
+                                    <button onClick={() => compressSingleImage()} className="py-2 px-4 rounded-lg bg-pink-500 text-white font-bold shadow hover:scale-105 transition-transform" aria-label="Re-compress this image with current settings">Re-compress</button>
                                                                         {files[0].compressedUrl && (
-                                                                                                    <a href={files[0].compressedUrl} download={getProcessedFileName(files[0])} className={`py-2 px-4 rounded-lg font-bold border transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white' : 'bg-gray-100 hover:bg-gray-200 border-gray-200 text-black'}`}>
+                                                                                                    <a href={files[0].compressedUrl} download={getProcessedFileName(files[0])} className={`py-2 px-4 rounded-lg font-bold border transition-all ${isDarkMode ? 'bg-white/10 hover:bg-white/20 border-white/10 text-white' : 'bg-gray-100 hover:bg-gray-200 border-gray-200 text-black'}`} aria-label="Download compressed image">
                                                                                     Download
                                                                             </a>
                                                                         )}
@@ -356,7 +356,7 @@ const Dashboard = ({
                         <button 
                             onClick={() => performCompression()}
                             disabled={isGlobalProcessing || files.some(f => f.status === 'uploading')}
-                            className="shrink-0 h-9 px-4 rounded-full bg-gradient-to-br from-pink-500 to-violet-600 text-white shadow flex items-center justify-center font-bold gap-2 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="shrink-0 h-9 px-4 rounded-full bg-linear-to-br from-pink-500 to-violet-600 text-white shadow flex items-center justify-center font-bold gap-2 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isGlobalProcessing ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-4 h-4" />}
                             <span className="text-sm">Compress</span>

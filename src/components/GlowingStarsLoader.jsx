@@ -20,7 +20,7 @@ const GlowingStarsLoader = ({ text = "UPLOADING" }) => {
          <div className="w-24 h-24 bg-pink-500/20 rounded-full blur-xl animate-pulse absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
          <Sparkles className="w-12 h-12 text-pink-400 animate-bounce relative z-10" />
       </div>
-      <div className="mt-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-violet-300 font-bold text-xl animate-pulse tracking-widest">
+      <div className="mt-6 text-transparent bg-clip-text bg-linear-to-r from-pink-300 to-violet-300 font-bold text-xl animate-pulse tracking-widest">
         {text}
       </div>
       {stars.map((s, i) => (

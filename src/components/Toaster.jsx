@@ -27,7 +27,7 @@ const Toast = ({ id, type, message, onClose, duration = 4000, persistent = false
   let colorStyle = 'bg-green-600 text-white border border-green-700';
   if (type === 'error') colorStyle = 'bg-red-600 text-white border border-red-700';
   // make persistent thanks/toast more decorative
-  if (persistent && type === 'info') colorStyle = 'bg-gradient-to-br from-pink-500 to-violet-600 text-white border-transparent';
+  if (persistent && type === 'info') colorStyle = 'bg-linear-to-br from-pink-500 to-violet-600 text-white border-transparent';
 
   return (
     <div className={`${baseStyle} ${outerClasses} ${colorStyle}`}>

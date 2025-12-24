@@ -1,15 +1,19 @@
 {
-  "name": "ImageSmith",
+  "name": "ImageSmith - Free Image Compressor",
   "short_name": "ImageSmith",
+  "description": "Free online image compressor with no ads. Compress JPEG, PNG, WebP images in bulk - 100% free and ad-free.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#111827",
+  "orientation": "any",
+  "categories": ["productivity", "utilities", "photo"],
   "icons": [
     {
       "src": "/logo.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

@@ -1,3 +1,19 @@
+# ImageSmith - Free Image Compression Tool
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+Disallow: /*.json$
 Sitemap: https://www.imagesmith.store/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 0
+
+# Major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /

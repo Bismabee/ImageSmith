@@ -6,7 +6,7 @@ const SplashScreen = ({ show, isDarkMode }) => (
         <div className="flex flex-col items-center">
             <div className="relative">
                 <div className={`w-32 h-32 rounded-full blur-2xl animate-pulse absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ${isDarkMode ? 'bg-pink-500/20' : 'bg-pink-200/20'}`}></div>
-                <div className="bg-gradient-to-tr from-pink-500 to-violet-500 p-6 rounded-full shadow-2xl animate-bounce">
+                <div className="bg-linear-to-tr from-pink-500 to-violet-500 p-6 rounded-full shadow-2xl animate-bounce">
                   <Sparkles className={`${isDarkMode ? 'text-white' : 'text-white'} w-16 h-16`} />
                 </div>
             </div>
